@@ -1,7 +1,6 @@
 package com.mlh.tvapp;
 
 import android.os.CountDownTimer;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.GridLayoutManager;
@@ -13,10 +12,13 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity implements Presenter.OrdersListener {
 
-    List<Order> orders = new ArrayList<>();
+    List<Order> readyOrders = new ArrayList<>();
+    List<Order> notReadyOrders = new ArrayList<>();
     Presenter presenter;
-    DataAdapter adapter;
-    RecyclerView recyclerView;
+    DataAdapter notReadyAdapter;
+    DataAdapter readyAdapter;
+    RecyclerView rvNotReady;
+    RecyclerView rvReady;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -24,10 +26,16 @@ public class MainActivity extends AppCompatActivity implements Presenter.OrdersL
         setContentView(R.layout.activity_main);
         presenter = new Presenter();
         presenter.getOrders(this);
-        recyclerView = findViewById(R.id.rv);
-        recyclerView.setLayoutManager(new GridLayoutManager(this, 5));
-        adapter = new DataAdapter(this, orders);
-        recyclerView.setAdapter(adapter);
+        rvNotReady = findViewById(R.id.rv_not_ready);
+        rvNotReady.setLayoutManager(new GridLayoutManager(this, 3));
+        notReadyAdapter = new DataAdapter(this, notReadyOrders);
+        rvNotReady.setAdapter(notReadyAdapter);
+
+        rvReady = findViewById(R.id.rv_ready);
+        rvReady.setLayoutManager(new GridLayoutManager(this, 3));
+        readyAdapter = new DataAdapter(this, readyOrders);
+        rvReady.setAdapter(readyAdapter);
+
         CountDownTimer timer = new CountDownTimer(1500, 1500) {
             @Override
             public void onTick(long l) {
@@ -45,12 +53,27 @@ public class MainActivity extends AppCompatActivity implements Presenter.OrdersL
 
     @Override
     public void onSuccess(List<Order> ordersList) {
-        adapter.orders = ordersList;
-        adapter.notifyDataSetChanged();
+        readyOrders.clear();
+        notReadyOrders.clear();
+
+        for (Order order: ordersList) {
+            if (order.status == 0) {
+                notReadyOrders.add(order);
+            }
+            if (order.status == 1) {
+                readyOrders.add(order);
+            }
+        }
+
+        notReadyAdapter.orders = notReadyOrders;
+        notReadyAdapter.notifyDataSetChanged();
+
+        readyAdapter.orders = readyOrders;
+        readyAdapter.notifyDataSetChanged();
     }
 
     @Override
     public void onError() {
-        //Snackbar.make(recyclerView, "Ошибка сети", Snackbar.LENGTH_LONG).show();
+        //Snackbar.make(rvNotReady, "Ошибка сети", Snackbar.LENGTH_LONG).show();
     }
 }

@@ -46,7 +46,7 @@ class DataAdapter extends RecyclerView.Adapter<DataAdapter.ViewHolder> {
         new DownloadImageTask(holder.imageView).execute(order.image);
         holder.tvId.setText(order.number);
         if (order.status == 1)
-            holder.tvId.setTextColor(Color.GREEN);
+            holder.tvId.setTextColor(Color.parseColor("#006600"));
         holder.tvTime.setText(order.timestamp);
     }
 
